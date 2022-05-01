@@ -34,7 +34,7 @@ async function run() {
             res.send(item);
         });
 
-        //update item increment
+        //update item increment & decrement
         app.put('/item/:id', async (req, res) => {
             const id = req.params.id;
             const updatedQuantity = req.body;
@@ -42,13 +42,14 @@ async function run() {
             const options = { upsert: true };
             const updatedDoc = {
                 $set: {
-                    quantity: updatedQuantity.quantity1,
+                    quantity: updatedQuantity.quantity,
                 }
             };
             const result = await itemsCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
         })
 
+        
         //delete Inventory item
         app.delete('/item/:id', async (req, res) => {
             const id = req.params.id;
@@ -56,6 +57,13 @@ async function run() {
             const result = await itemsCollection.deleteOne(query);
             res.send(result);
         })
+
+        //POST
+        app.post('/item', async (req, res) => {
+            const newInventoryItem = req.body;
+            const result = await itemsCollection.insertOne(newInventoryItem);
+            res.send(result);
+        });
     }
     finally {
 
