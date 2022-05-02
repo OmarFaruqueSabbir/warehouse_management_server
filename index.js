@@ -17,14 +17,20 @@ async function run() {
         await client.connect();
         const itemsCollection = client.db('inventoryItems').collection('items');
 
+        //get all items & get items filtering email
+        app.get('/item',async (req,res) => {
+            let query;
+            const email = req.query.email
+            if(!req.query.email){
+                query = {}
+            } else {
+                query = {email: email}
+            }
+            const cursor = itemsCollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+        })
 
-        //Get all Items
-        app.get('/item', async (req, res) => {
-            const query = {};
-            const cursor = itemsCollection.find(query);
-            const items = await cursor.toArray();
-            res.send(items);
-        });
 
         //get single items
         app.get('/item/:id', async (req, res) => {
@@ -49,7 +55,6 @@ async function run() {
             res.send(result);
         })
 
-        
         //delete Inventory item
         app.delete('/item/:id', async (req, res) => {
             const id = req.params.id;
