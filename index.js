@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 //middleware
 app.use(cors());
@@ -17,6 +18,14 @@ async function run() {
         await client.connect();
         const itemsCollection = client.db('inventoryItems').collection('items');
 
+
+        //set accessToken locally by login
+        app.post("/login", (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
+            res.send({ accessToken })
+        })
+
         //get all items & get items filtering email
         app.get('/item',async (req,res) => {
             let query;
@@ -30,6 +39,9 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
+
+
+
 
 
         //get single items
@@ -84,3 +96,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log('Listening to port', port);
 })
+
