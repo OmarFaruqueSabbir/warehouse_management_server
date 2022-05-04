@@ -5,6 +5,23 @@ const app = express();
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { decode } = require('jsonwebtoken');
+
+function tokenVerify(token) {
+    let email;
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            email = 'Email is Invalid'
+            //console.log(err)
+        }
+        if (decoded) {
+            //console.log(decoded)
+            email = decoded
+        }
+    });
+    return email;
+}
+
 //middleware
 app.use(cors());
 app.use(express.json())
@@ -26,23 +43,29 @@ async function run() {
             res.send({ accessToken })
         })
 
-        //get all items & get items filtering email
-        app.get('/item',async (req,res) => {
-            let query;
+        // get all items & get items filtering email & verifying with token
+        app.get('/item', async (req, res) => {
+            let query
             const email = req.query.email
-            if(!req.query.email){
-                query = {}
+            if (email) {
+                const accessToken = req.headers.authorization;
+                const decoded = tokenVerify(accessToken)
+                if (email === decoded.email) {
+                    query = { email: email }
+                    const cursor = itemsCollection.find(query);
+                    const result = await cursor.toArray();
+                    res.send(result);
+                } else {
+                    res.send({ success: 'Access Denied' })
+                }
+
             } else {
-                query = {email: email}
+                query = {}
+                const cursor = itemsCollection.find(query);
+                const result = await cursor.toArray();
+                res.send(result);
             }
-            const cursor = itemsCollection.find(query)
-            const result = await cursor.toArray()
-            res.send(result)
-        })
-
-
-
-
+        });
 
         //get single items
         app.get('/item/:id', async (req, res) => {
@@ -96,4 +119,6 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log('Listening to port', port);
 })
+
+
 
