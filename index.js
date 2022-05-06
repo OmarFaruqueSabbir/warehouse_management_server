@@ -75,7 +75,7 @@ async function run() {
             res.send(item);
         });
 
-        //update item increment & decrement
+        //update items increment & decrement
         app.put('/item/:id', async (req, res) => {
             const id = req.params.id;
             const updatedQuantity = req.body;
