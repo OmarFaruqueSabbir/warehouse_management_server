@@ -11,7 +11,7 @@ function tokenVerify(token) {
     let email;
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
         if (err) {
-            email = 'Email is Invalid'
+            email = 'Email is not vaild'
             //console.log(err)
         }
         if (decoded) {
